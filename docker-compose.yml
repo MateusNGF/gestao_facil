@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - ./docker_volumes/postgres:/var/lib/postgresql/data
+  rabbitmq:
+      image: rabbitmq:3-management-alpine
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+      environment:
+        RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+        RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      volumes:
+        - ./docker_volumes/rabbitmq:/var/lib/rabbitmq
+      healthcheck:
+        test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+      restart: unless-stopped
+      networks:
+        - backend
+  mongodb:
+      image: mongo:7
+      ports:
+        - "27017:27017"
+      environment:
+        - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+        - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      command: >
+        bash -c "
+          openssl rand -base64 756 > keyfile_replset_mongo &&
+          chmod 400 keyfile_replset_mongo &&
+          exec /usr/bin/mongod --bind_ip_all --replSet rs0 --keyFile keyfile_replset_mongo
+        "
+      volumes:
+        - ./docker_volumes/mongodb:/data/db
+      healthcheck:
+        test: >
+           mongosh --host localhost --port 27017 --eval "try { rs.status() } catch (err) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '127.0.0.1:27017' }] }) }"
+        timeout: 5s
+        retries: 5
+        start_period: 40s
+      restart: always
+      networks:
+        - backend
+
+networks:
+  backend:
+    name: backend

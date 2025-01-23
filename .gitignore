@@ -1,0 +1,6 @@
+docker_volumes
+*.env
+
+clientes/**
+notification/**
+frontend
