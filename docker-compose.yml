@@ -36,7 +36,7 @@ services:
       networks:
         - backend
   mongodb:
-      image: mongo:7
+      image: mongo:6
       ports:
         - "27017:27017"
       environment:
