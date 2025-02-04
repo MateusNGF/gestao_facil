@@ -1,0 +1,30 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: auth_service
+    host: host.docker.internal
+    port: 9001
+    protocol: http
+    routes:
+      - name: auth_route
+        paths:
+          - /auth
+        strip_path: true
+
+  - name: stock_service
+    host: host.docker.internal
+    port: 9002
+    protocol: http
+    routes:
+      - name: stock_route
+        paths:
+          - /stock
+        strip_path: true
+
+plugins:
+  - name: rate-limiting
+    config:
+      second: 20
+      hour: 10000
+      policy: local

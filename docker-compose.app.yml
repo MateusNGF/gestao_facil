@@ -1,0 +1,53 @@
+services:
+  auth-service:
+    build:
+      context: ./gf_microservice_auth
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://admin:admin@postgres:5432/stock?connection_limit=200&schema=public"
+      RABBITMQ_URL: "amqp://admin:master123@rabbitmq:5672"
+    ports:
+      - "9001:9001"
+    env_file:
+      - ./gf_microservice_auth/.env
+    restart: on-failure
+    networks:
+      - backend
+
+  stock-service:
+    build:
+      context: ./gf_microservice_stock
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://admin:admin@postgres:5432/stock?connection_limit=200&schema=public"
+      RABBITMQ_URL: "amqp://admin:master123@rabbitmq:5672"
+    ports:
+      - "9002:9002"
+    env_file:
+      - ./gf_microservice_stock/.env
+    restart: on-failure
+    networks:
+      - backend
+
+  kong:
+    build:
+      context: .
+      dockerfile: Kong.Dockerfile
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8443:8443"
+      - "8444:8444"
+    restart: unless-stopped
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+networks:
+  backend:
+    name: backend
+    external: true
