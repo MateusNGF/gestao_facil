@@ -4,7 +4,7 @@ services:
       context: ./gf_microservice_auth
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: "postgresql://admin:admin@postgres:5432/stock?connection_limit=200&schema=public"
+      DATABASE_URL: "postgresql://admin:admin@postgres:5432/auth?connection_limit=200&schema=public"
       RABBITMQ_URL: "amqp://admin:master123@rabbitmq:5672"
     ports:
       - "9001:9001"

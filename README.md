@@ -6,7 +6,7 @@
 Passo a passo para realizar deploy.
 
 1. Primeiro comando: `docker compose -f docker-compose.yml up -d --build`
-2. Segundo comando: `docker compose -f docker-compose.app.yml -d --build`
+2. Segundo comando: `docker compose -f docker-compose.app.yml up-d --build`
 
 > Verifique se todos os serviços estão funcionando.
 
@@ -15,6 +15,9 @@ Agora, devemos adicionar o usuario admin no mongo (Note que o nome do banco pode
 
 > Agora precisamos rodas as seeds, teremos que entrar em cada container e executar o seguinte comando:
 4. `npm run prisma:seed`
+
+4.1 - `docker exec gestao_facil-stock-service-1 npm run prisma:seed`
+4.2 - `docker exec gestao_facil-auth-service-1 npm run prisma:seed`
 
 
 Quando realizarmos
